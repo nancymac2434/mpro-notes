@@ -23,7 +23,7 @@ if (!in_array($assigned_client, ['demo', 'mentorpro']) && !current_user_can('man
 }
 **/
 
-	echo '<div style="display: flex; flex-direction: column; gap: 20px; background-color: #F0F0F0;">';
+	echo '<div class="mpro-notes-container" style="display: flex; flex-direction: column; gap: 20px; background-color: #ECECEC; padding: 20px; border-radius: 8px;">';
 	//echo '<div class="white-box">';
 
 
@@ -51,66 +51,100 @@ if (!in_array($assigned_client, ['demo', 'mentorpro']) && !current_user_can('man
 	?>
 	
 	<h3 style="font-style: italic;">Mentee notes can be created and viewed by all Mentors and PMs in a program.</h3>
-	
+
+	<?php
+	// Show CSV download button for PMs and Admins
+	if ($display_role === 'contract' || current_user_can('manage_options')) : ?>
+		<div style="text-align: right; margin-bottom: 20px;">
+			<form method="post" style="margin: 0; display: inline-block;">
+				<?php wp_nonce_field('mpro_download_csv', 'mpro_csv_nonce'); ?>
+				<button type="submit" name="mpro_download_notes_csv" style="background-color: #5B9B9F; color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 6px; font-size: 15px;">
+					Download all Notes
+				</button>
+			</form>
+		</div>
+	<?php endif; ?>
+
 	<!-- Hidden input to track Select All (even if not used here) -->
 	<input type="hidden" id="<?php echo esc_attr($hidden_input_id); ?>" name="<?php echo esc_attr($hidden_input_id); ?>" value="0">
 	
-	<form method="post">
-		<label for="<?php echo esc_attr($select_id); ?>">Select a Mentee:</label>
-		
-		<!--
-		<div style="margin-bottom: 10px;">
-			<button type="button" id="<?php echo esc_attr($button_id); ?>" style="padding: 5px 10px;">
-				Select All Mentees
-			</button>
-		</div>
-	-->
-	
-		<select id="<?php echo esc_attr($select_id); ?>"
-				name="<?php echo esc_attr($input_name); ?>"
-				style="width: 100%;">
-			<?php foreach ($mentees as $mentee) : ?>
-				<option value="<?php echo esc_attr($mentee->ID); ?>" <?php echo ($selected_mentee_id == $mentee->ID) ? 'selected' : ''; ?>>
-					<?php echo esc_html($mentee->display_name); ?>
-				</option>
-			<?php endforeach; ?>
-		</select>
-	
-		<br><br>
-		<input type="submit" value="View Notes" style="background-color: #2B4D59; color: white; border: none; padding: 10px; cursor: pointer;">
-	</form>
+	<div class="white-box">
+		<form method="post">
+			<label for="<?php echo esc_attr($select_id); ?>">Select a Mentee:</label>
 
+			<!--
+			<div style="margin-bottom: 10px;">
+				<button type="button" id="<?php echo esc_attr($button_id); ?>" style="padding: 5px 10px;">
+					Select All Mentees
+				</button>
+			</div>
+		-->
+
+			<select id="<?php echo esc_attr($select_id); ?>"
+					name="<?php echo esc_attr($input_name); ?>"
+					style="width: 100%;">
+				<?php foreach ($mentees as $mentee) : ?>
+					<option value="<?php echo esc_attr($mentee->ID); ?>" <?php echo ($selected_mentee_id == $mentee->ID) ? 'selected' : ''; ?>>
+						<?php echo esc_html($mentee->display_name); ?>
+					</option>
+				<?php endforeach; ?>
+			</select>
+
+			<div style="text-align: center; margin-top: 20px;">
+				<input type="submit" value="View Mentee Notes" style="background-color: #3D5A6C; color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 6px; font-size: 15px;">
+			</div>
+		</form>
+	</div>
 
 
 
 <?php
-	echo '<div class="white-box">';
-
 // If a mentee is selected, show notes
-if ($selected_mentee_id) { ?>
-	
-	<!-- Notes Form -->
-	<form method="post">
-		<?php wp_nonce_field('mpro_add_note', 'mpro_note_nonce'); ?>
-		
-		<input type="hidden" name="mentee_id" value="<?php echo esc_attr($selected_mentee_id); ?>">
-	
-		<textarea name="note_content" placeholder="Write a note..." required style="width:100%; height:100px;"></textarea>
-	
-		<input type="submit" name="mpro_add_note" value="Save Note" style="width:15%; background-color: #2B4D59; color: white; border: none; padding: 10px; cursor: pointer;">
-	</form>
-	
-	<?php
+if ($selected_mentee_id) {
+	$mentee_name = get_userdata($selected_mentee_id)->display_name;
 	$notes = mpro_get_notes_for_mentee($selected_mentee_id);
-	//error_log( 'Notes ' . json_encode($notes));
+	?>
 
-	echo '</div><div class="white-box">';
+	<!-- Notes Section Header -->
+	<div class="white-box" style="text-align: center; padding: 15px;">
+		<h2 style="margin: 0; font-size: 24px;">Notes For: <?php echo esc_html($mentee_name); ?></h2>
+	</div>
 
+	<!-- Add New Note Section -->
+	<div class="white-box">
+		<h3 style="margin-top: 0;">Add a New Note</h3>
+		<form method="post">
+			<?php wp_nonce_field('mpro_add_note', 'mpro_note_nonce'); ?>
 
-	echo '<input type="text" id="notes-search" placeholder="Search notes..." style="margin-bottom: 20px; width: 100%; padding: 8px;">';
+			<input type="hidden" name="mentee_id" value="<?php echo esc_attr($selected_mentee_id); ?>">
+
+			<?php
+			wp_editor('', 'note_content', [
+				'textarea_name' => 'note_content',
+				'media_buttons' => false,
+				'textarea_rows' => 8,
+				'teeny' => false,
+				'quicktags' => true,
+				'tinymce' => [
+					'toolbar1' => 'formatselect,bold,italic,underline,bullist,numlist,link,unlink',
+					'toolbar2' => ''
+				]
+			]);
+			?>
+
+			<div style="text-align: center; margin-top: 10px;">
+				<input type="submit" name="mpro_add_note" value="Save Note" style="background-color: #5B9B9F; color: white; border: none; padding: 12px 24px; cursor: pointer; border-radius: 6px; font-size: 15px;">
+			</div>
+		</form>
+	</div>
+
+	<!-- View Notes Section -->
+	<div class="white-box">
+		<h3 style="margin-top: 0;">View Notes</h3>
+		<input type="text" id="notes-search" placeholder="Search notes..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px;">
+
+	<?php
 	if ($notes) {
-		echo "<h3>Notes for " . esc_html(get_userdata($selected_mentee_id)->display_name) . ":";
-		echo "</h3>";
 		echo '<div id="notes-container">'; // 🔧 START CONTAINER FOR JS SEARCH
 
 		foreach ($notes as $note) {
@@ -149,9 +183,9 @@ if ($selected_mentee_id) { ?>
 			}
 			echo '</summary>'; 
 
-		
+
 			echo '<div class="content">';
-			echo nl2br(esc_html($note->post_content));
+			echo wp_kses_post($note->post_content);
 			echo '</div>';
 
 			if ($is_owner_or_admin) { ?>		
@@ -163,7 +197,19 @@ if ($selected_mentee_id) { ?>
 				<form method="post">
 					<?php echo wp_nonce_field('mpro_edit_note', 'mpro_edit_note_nonce', true, false); ?>
 					<input type="hidden" name="note_id" value="<?php echo esc_attr($note->ID); ?>">
-					<textarea name="note_content" rows="5" cols="60"><?php echo esc_textarea($note->post_content); ?></textarea>
+					<?php
+					wp_editor($note->post_content, 'note_content_edit_' . $note->ID, [
+						'textarea_name' => 'note_content',
+						'media_buttons' => false,
+						'textarea_rows' => 8,
+						'teeny' => false,
+						'quicktags' => true,
+						'tinymce' => [
+							'toolbar1' => 'formatselect,bold,italic,underline,bullist,numlist,link,unlink',
+							'toolbar2' => ''
+						]
+					]);
+					?>
 					<br>
 					<button type="submit" name="edit_note">Save Changes</button>
 				</form>
@@ -175,15 +221,15 @@ if ($selected_mentee_id) { ?>
 
 			echo '</details>';
 		}
-		echo "</div>";
+		echo "</div>"; // end notes-container
 	} else {
-		echo "<h3>No notes found for " . esc_html(get_userdata($selected_mentee_id)->display_name) . ".";
-
+		echo "<p style='color: #666; font-style: italic;'>No notes have been added yet.</p>";
 	}
-	echo '</div>';	
-echo '</div>';	
+	?>
+	</div> <!-- end View Notes white-box -->
 
-
+<?php
 }
- 
 ?>
+
+</div> <!-- end main grey container -->

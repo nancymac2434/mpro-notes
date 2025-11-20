@@ -62,20 +62,6 @@ function my_plugin_enqueue_scripts() {
 }
 add_action('wp_enqueue_scripts', 'my_plugin_enqueue_scripts');
 
-add_action('wp_footer', function(){
-	?>
-	<script>
-	jQuery(document).ready(function($) {
-		$('.edit-note-button').on('click', function(){
-			var noteID = $(this).data('note-id');
-			$('#edit-note-form-' + noteID).toggle();
-		});
-	});
-	</script>
-	<?php
-});
-
-
 add_action('init', 'mpro_process_edit_note');
 function mpro_process_edit_note() {
 	if ( isset($_POST['edit_note']) ) {
@@ -86,7 +72,7 @@ function mpro_process_edit_note() {
 		
 		// Retrieve and sanitize inputs
 		$note_id = isset($_POST['note_id']) ? absint($_POST['note_id']) : 0;
-		$new_content = isset($_POST['note_content']) ? sanitize_textarea_field($_POST['note_content']) : '';
+		$new_content = isset($_POST['note_content']) ? wp_kses_post($_POST['note_content']) : '';
 		
 		if ( $note_id && $new_content !== '' ) {
 			// Update the note (assuming it's stored as a post)
@@ -107,17 +93,3 @@ function mpro_process_edit_note() {
 		}
 	}
 }
-
-function mpro_notes_enqueue_custom_scripts() {
-	
-	// Enqueue your custom scripts file with proper dependencies.
-	wp_enqueue_script(
-		'mpro-custom-scripts',
-		plugin_dir_url( __FILE__ ) . 'assets/js/scripts.js',
-		array('jquery', 'select2'),
-		'1.0',
-		true
-	);
-	
-}
-add_action('wp_enqueue_scripts', 'mpro_notes_enqueue_custom_scripts');

@@ -1,13 +1,11 @@
 document.addEventListener("DOMContentLoaded", function() {
 	var searchInput = document.getElementById("notes-search");
-	var title = note.querySelector("summary")?.textContent.toLowerCase() || "";
-	var content = note.querySelector(".content")?.textContent.toLowerCase() || "";
 	if (!searchInput) return; // Prevent errors if the element is not found
-	
+
 	searchInput.addEventListener("keyup", function() {
 		var filter = searchInput.value.toLowerCase();
 		var notes = document.querySelectorAll("#notes-container details.accordion");
-		
+
 		notes.forEach(function(note) {
 			// Combine title and content for the search
 			var title = note.querySelector("summary").textContent.toLowerCase();
@@ -34,4 +32,9 @@ document.addEventListener("DOMContentLoaded", function () {
 		console.log("Select element #user_select_mentee not found.");
 	}
 
+	// Edit note button toggle
+	jQuery('.edit-note-button').on('click', function(){
+		var noteID = jQuery(this).data('note-id');
+		jQuery('#edit-note-form-' + noteID).toggle();
+	});
 });
