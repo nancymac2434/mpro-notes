@@ -49,8 +49,6 @@ if (!in_array($assigned_client, ['demo', 'mentorpro']) && !current_user_can('man
 	$hidden_input_id = 'share_with_all_' . $role . 's';
 	$input_name = 'mentee_id';
 	?>
-	
-	<h3 style="font-style: italic;">Mentee notes can be created and viewed by all Mentors and PMs in a program.</h3>
 
 	<?php
 	// Show CSV download button for PMs and Admins
@@ -65,10 +63,12 @@ if (!in_array($assigned_client, ['demo', 'mentorpro']) && !current_user_can('man
 		</div>
 	<?php endif; ?>
 
+	<h3 style="font-style: italic; font-size: 20px; text-align: center;">Mentee notes can be created and viewed by all Mentors and PMs in a program.</h3>
+
 	<!-- Hidden input to track Select All (even if not used here) -->
 	<input type="hidden" id="<?php echo esc_attr($hidden_input_id); ?>" name="<?php echo esc_attr($hidden_input_id); ?>" value="0">
-	
-	<div class="white-box">
+
+	<div>
 		<form method="post">
 			<label for="<?php echo esc_attr($select_id); ?>">Select a Mentee:</label>
 
@@ -96,7 +96,7 @@ if (!in_array($assigned_client, ['demo', 'mentorpro']) && !current_user_can('man
 		</form>
 	</div>
 
-
+</div> <!-- end first mpro-notes-container -->
 
 <?php
 // If a mentee is selected, show notes
@@ -105,14 +105,16 @@ if ($selected_mentee_id) {
 	$notes = mpro_get_notes_for_mentee($selected_mentee_id);
 	?>
 
+<div class="mpro-notes-container" style="display: flex; flex-direction: column; gap: 20px; background-color: #ECECEC; padding: 20px; border-radius: 8px; margin-top: 60px;">
+
 	<!-- Notes Section Header -->
-	<div class="white-box" style="text-align: center; padding: 15px;">
+	<div style="text-align: center; padding: 15px;">
 		<h2 style="margin: 0; font-size: 24px;">Notes For: <?php echo esc_html($mentee_name); ?></h2>
 	</div>
 
 	<!-- Add New Note Section -->
-	<div class="white-box">
-		<h3 style="margin-top: 0;">Add a New Note</h3>
+	<div>
+		<h3 style="margin-top: 0; margin-bottom: 10px;">Add a New Note</h3>
 		<form method="post">
 			<?php wp_nonce_field('mpro_add_note', 'mpro_note_nonce'); ?>
 
@@ -139,8 +141,8 @@ if ($selected_mentee_id) {
 	</div>
 
 	<!-- View Notes Section -->
-	<div class="white-box">
-		<h3 style="margin-top: 0;">View Notes</h3>
+	<div>
+		<h3 style="margin-top: 0; margin-bottom: 10px;">View Published Notes</h3>
 		<input type="text" id="notes-search" placeholder="Search notes..." style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 20px;">
 
 	<?php
@@ -228,8 +230,8 @@ if ($selected_mentee_id) {
 	?>
 	</div> <!-- end View Notes white-box -->
 
+</div> <!-- end second mpro-notes-container -->
+
 <?php
 }
 ?>
-
-</div> <!-- end main grey container -->

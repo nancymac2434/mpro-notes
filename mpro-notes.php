@@ -55,7 +55,7 @@ function my_plugin_enqueue_scripts() {
 	wp_enqueue_script(
 		'mpro-notes-scripts', // Unique handle
 		plugins_url('assets/js/script.js', __FILE__), // Path to your JS file
-		array(), // Dependencies if any (e.g., array('jquery') if using jQuery)
+		array('jquery'), // Dependencies - jQuery is required
 		'1.0.0', // Version number
 		true // Load in footer
 	);
@@ -69,24 +69,33 @@ function mpro_process_edit_note() {
 		if ( ! isset($_POST['mpro_edit_note_nonce']) || ! wp_verify_nonce($_POST['mpro_edit_note_nonce'], 'mpro_edit_note') ) {
 			wp_die('Security check failed.');
 		}
-		
+
 		// Retrieve and sanitize inputs
 		$note_id = isset($_POST['note_id']) ? absint($_POST['note_id']) : 0;
 		$new_content = isset($_POST['note_content']) ? wp_kses_post($_POST['note_content']) : '';
-		
+
 		if ( $note_id && $new_content !== '' ) {
 			// Update the note (assuming it's stored as a post)
 			$updated = wp_update_post([
 				'ID'           => $note_id,
 				'post_content' => $new_content,
 			]);
-			
+
 			if ( is_wp_error( $updated ) ) {
 				// Log error or handle it as needed
 				error_log('Error updating note: ' . $updated->get_error_message());
 			} else {
-				// Optionally, you can set a query parameter to indicate success.
-				$redirect_url = add_query_arg('note_updated', 'true', wp_get_referer());
+				// Get the mentee_id from the note's meta to preserve it in the redirect
+				$mentee_id = get_post_meta($note_id, 'related_mentee', true);
+
+				// Redirect with both success flag and mentee_id preserved
+				$redirect_url = add_query_arg(
+					array(
+						'note_updated' => 'true',
+						'mentee_id' => $mentee_id
+					),
+					wp_get_referer()
+				);
 				wp_redirect($redirect_url);
 				exit;
 			}
