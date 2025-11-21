@@ -156,7 +156,7 @@ function mpro_handle_csv_download() {
 		fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
 		// CSV Headers
-		fputcsv($output, ['Mentee Name', 'Mentor Name', 'Date Created', 'Date Modified', 'Note Content']);
+		fputcsv($output, ['Mentee Name', 'Mentor Name', 'Date Created', 'Date Modified', 'Note Content'], ',', '"', '\\');
 
 		// Add data rows
 		foreach ($notes as $note) {
@@ -178,7 +178,7 @@ function mpro_handle_csv_download() {
 				$date_created,
 				$date_modified,
 				$note->post_content
-			]);
+			], ',', '"', '\\');
 		}
 
 		fclose($output);
