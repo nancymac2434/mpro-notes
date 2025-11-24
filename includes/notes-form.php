@@ -191,7 +191,9 @@ if ($selected_mentee_id) {
 			echo '</div>';
 
 			if ($is_owner_or_admin) { ?>		
-				<button type="button" class="edit-note-button" data-note-id="<?php echo esc_attr($note->ID); ?>" style="margin-right: 5px;">Edit</button>
+				<div style="text-align: right; margin: 10px;">
+				<button type="button" class="edit-note-button" data-note-id="<?php echo esc_attr($note->ID); ?>">Edit</button>
+			</div>
 							
 				<!-- Inline Edit Form (initially hidden) -->
 				<div class="table-responsive">
@@ -212,8 +214,10 @@ if ($selected_mentee_id) {
 						]
 					]);
 					?>
-					<br>
-					<button type="submit" name="edit_note">Save Changes</button>
+					<div style="text-align: right; margin: 10px;">
+						<button type="button" onclick="jQuery('#edit-note-form-<?php echo esc_attr($note->ID); ?>').hide();" style="background-color: #6c757d; margin-right: 10px;">Cancel</button>
+						<button type="submit" name="edit_note">Save Changes</button>
+					</div>
 				</form>
 				</div>	
 				</div>

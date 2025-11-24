@@ -156,13 +156,30 @@ function mpro_handle_csv_download() {
 		fprintf($output, chr(0xEF).chr(0xBB).chr(0xBF));
 
 		// CSV Headers
-		fputcsv($output, ['Mentee Name', 'Mentor Name', 'Date Created', 'Date Modified', 'Note Content'], ',', '"', '\\');
+		fputcsv($output, ['Mentee Name', 'Author Name', 'Author Role', 'Date Created', 'Date Modified', 'Note Content'], ',', '"', '\\');
 
 		// Add data rows
 		foreach ($notes as $note) {
 			$mentee_id = get_post_meta($note->ID, 'related_mentee', true);
 			$mentee = get_userdata($mentee_id);
 			$mentor = get_userdata($note->post_author);
+
+			// Get author role
+			$author_role = 'Unknown';
+			if ($mentor) {
+				$author_roles = $mentor->roles;
+				$role = get_highest_priority_role($author_roles);
+
+				// Map role to display name
+				$role_display_map = [
+					'contract'     => 'Program Manager',
+					'mentor'       => 'Mentor',
+					'group_leader' => 'Mentor',
+					'mentee'       => 'Mentee'
+				];
+
+				$author_role = isset($role_display_map[$role]) ? $role_display_map[$role] : ucfirst($role);
+			}
 
 			$date_created = get_the_date('Y-m-d', $note);
 			$date_modified = get_the_modified_date('Y-m-d', $note);
@@ -175,6 +192,7 @@ function mpro_handle_csv_download() {
 			fputcsv($output, [
 				$mentee ? $mentee->display_name : 'Unknown',
 				$mentor ? $mentor->display_name : 'Unknown',
+				$author_role,
 				$date_created,
 				$date_modified,
 				$note->post_content
